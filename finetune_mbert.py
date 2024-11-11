@@ -1,9 +1,11 @@
 import torch
 from torch.utils.data import Dataset
-from transformers import BertTokenizerFast
-import nltk
-from nltk import FreqDist
+from transformers import BertTokenizerFast, BertForTokenClassification, Trainer, TrainingArguments
+import numpy as np
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
+# load mBERT tokenizer
+tokenizer = BertTokenizerFast.from_pretrained('bert-base-multilingual-cased')
 transformed = []
 
 # turn each line into a sentence tag object
@@ -25,8 +27,6 @@ unique_tags = list(set(tag for sentence in transformed for tag in sentence["tags
 tag2id = {tag: idx for idx, tag in enumerate(unique_tags)}
 id2tag = {idx: tag for tag, idx in tag2id.items()}
 
-# load mBERT tokenizer
-tokenizer = BertTokenizerFast.from_pretrained('bert-base-multilingual-cased')
 
 def align_tags_with_tokens(sentence, tags, tokenizer):
     tokenized_input = tokenizer(sentence, is_split_into_words=True, truncation=True, padding='max_length')
@@ -73,3 +73,53 @@ class PosDataset(Dataset):
     
 dataset = PosDataset(data=transformed, tokenizer=tokenizer, max_length=128)
 
+# Load BERT model for token classification
+model = BertForTokenClassification.from_pretrained("bert-base-multilingual-cased", num_labels=len(tag2id))
+
+# Define the metrics for evaluation
+def compute_metrics(pred):
+    labels = pred.label_ids
+    preds = np.argmax(pred.predictions, axis=2)
+
+    # Mask out padding tokens (-100) when computing metrics
+    mask = labels != -100
+    labels = labels[mask]
+    preds = preds[mask]
+
+    precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average="weighted")
+    accuracy = accuracy_score(labels, preds)
+
+    return {
+        "accuracy": accuracy,
+        "f1": f1,
+        "precision": precision,
+        "recall": recall
+    }
+
+# Set up Trainer and TrainingArguments
+training_args = TrainingArguments(
+    output_dir="./results",
+    evaluation_strategy="epoch",
+    learning_rate=3e-5,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
+    num_train_epochs=3,
+    weight_decay=0.01,
+)
+
+# Initialize Trainer
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=dataset,  # Use a train/validation split in practice
+    eval_dataset=dataset,   # Use separate validation dataset in practice
+    tokenizer=tokenizer,
+    compute_metrics=compute_metrics
+)
+
+# Fine-tune the model
+trainer.train()
+
+# Save the fine-tuned model and tokenizer
+model.save_pretrained("./fine_tuned_bert_icelandic")
+tokenizer.save_pretrained("./fine_tuned_bert_icelandic")
