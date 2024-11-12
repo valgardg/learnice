@@ -1,3 +1,4 @@
+import json
 import torch
 from torch.utils.data import Dataset
 from transformers import BertTokenizerFast, BertForTokenClassification, Trainer, TrainingArguments
@@ -126,3 +127,7 @@ trainer.train()
 # Save the fine-tuned model and tokenizer
 model.save_pretrained("./fine_tuned_bert_icelandic")
 tokenizer.save_pretrained("./fine_tuned_bert_icelandic")
+
+# Save id2tag mapping
+with open("id2tag.json", "w") as f:
+    json.dump(id2tag, f)
