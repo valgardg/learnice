@@ -102,9 +102,12 @@ training_args = TrainingArguments(
     evaluation_strategy="epoch",
     learning_rate=3e-5,
     per_device_train_batch_size=16,
+    gradient_accumulation_steps=2,
     per_device_eval_batch_size=16,
+    eval_accumulation_steps=4, # internet says this could help with evaluation memory issues; processes evaluation batches in small chuncks instead of all at once
     num_train_epochs=3,
     weight_decay=0.01,
+    fp16=True, # added fp16 as it can lead to better memory management at close to no cost of performance (supposedly)
 )
 
 # Initialize Trainer
