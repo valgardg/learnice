@@ -1,5 +1,6 @@
 import json
 import torch
+import math
 from torch.utils.data import Dataset
 from transformers import BertTokenizerFast, BertForTokenClassification, Trainer, TrainingArguments
 import numpy as np
@@ -72,7 +73,7 @@ class PosDataset(Dataset):
             'labels': torch.tensor(aligned_tags)
         }
     
-dataset = PosDataset(data=transformed, tokenizer=tokenizer, max_length=128)
+dataset = PosDataset(data=transformed[:math.ceil(len(transformed)/2)], tokenizer=tokenizer, max_length=128)
 
 # Load BERT model for token classification
 model = BertForTokenClassification.from_pretrained("bert-base-multilingual-cased", num_labels=len(tag2id))
@@ -102,9 +103,9 @@ training_args = TrainingArguments(
     output_dir="./results",
     evaluation_strategy="epoch",
     learning_rate=3e-5,
-    per_device_train_batch_size=16,
+    per_device_train_batch_size=8,
     gradient_accumulation_steps=2,
-    per_device_eval_batch_size=16,
+    per_device_eval_batch_size=8,
     eval_accumulation_steps=4, # internet says this could help with evaluation memory issues; processes evaluation batches in small chuncks instead of all at once
     num_train_epochs=3,
     weight_decay=0.01,
@@ -125,9 +126,9 @@ trainer = Trainer(
 trainer.train()
 
 # Save the fine-tuned model and tokenizer
-model.save_pretrained("./fine_tuned_bert_icelandic")
-tokenizer.save_pretrained("./fine_tuned_bert_icelandic")
+model.save_pretrained("./fine_tuned_bert_icelandic_testing")
+tokenizer.save_pretrained("./fine_tuned_bert_icelandic_testing")
 
 # Save id2tag mapping
-with open("id2tag.json", "w") as f:
+with open("id2tag_testing.json", "w") as f:
     json.dump(id2tag, f)

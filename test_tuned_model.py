@@ -4,7 +4,7 @@ import torch
 import json
 
 # Load id2tag mapping
-with open("id2tag.json", "r") as f:
+with open("id2tag_testing.json", "r") as f:
     id2tag = json.load(f)
 
 # Load your tokenizer and model from saved checkpoint
