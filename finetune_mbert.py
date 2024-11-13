@@ -73,7 +73,7 @@ class PosDataset(Dataset):
             'labels': torch.tensor(aligned_tags)
         }
     
-dataset = PosDataset(data=transformed[:math.ceil(len(transformed)*0.1)], tokenizer=tokenizer, max_length=128)
+dataset = PosDataset(data=transformed[:math.ceil(len(transformed)*0.5)], tokenizer=tokenizer, max_length=128)
 
 # Load BERT model for token classification
 model = BertForTokenClassification.from_pretrained("bert-base-multilingual-cased", num_labels=len(tag2id))
@@ -130,8 +130,8 @@ trainer.train()
 trainer.evaluate()
 
 # Save the fine-tuned model and tokenizer
-model.save_pretrained("./fine_tuned_bert_icelandic_testing")
-tokenizer.save_pretrained("./fine_tuned_bert_icelandic_testing")
+model.save_pretrained("./fine_tuned_bert_icelandic_ds50")
+tokenizer.save_pretrained("./fine_tuned_bert_icelandic_ds50")
 
 # Save id2tag mapping
 with open("id2tag_testing.json", "w") as f:
