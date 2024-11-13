@@ -1,6 +1,6 @@
 import json
-import torch
-from torch.utils.data import Dataset
+import torch # type: ignore
+from torch.utils.data import Dataset # type: ignore
 from transformers import BertTokenizerFast, BertForTokenClassification, Trainer, TrainingArguments
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
