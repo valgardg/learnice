@@ -1,3 +1,7 @@
+# project specific ignores
+fine_tuned_bert_icelandic_ds10/
+results/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
