@@ -73,7 +73,7 @@ class PosDataset(Dataset):
             'labels': torch.tensor(aligned_tags)
         }
     
-dataset = PosDataset(data=transformed[:math.ceil(len(transformed)/2)], tokenizer=tokenizer, max_length=128)
+dataset = PosDataset(data=transformed[:math.ceil(len(transformed)*0.1)], tokenizer=tokenizer, max_length=128)
 
 # Load BERT model for token classification
 model = BertForTokenClassification.from_pretrained("bert-base-multilingual-cased", num_labels=len(tag2id))

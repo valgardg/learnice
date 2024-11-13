@@ -7,9 +7,11 @@ import json
 with open("id2tag_testing.json", "r") as f:
     id2tag = json.load(f)
 
+print(id2tag["0"])
+
 # Load your tokenizer and model from saved checkpoint
-tokenizer = BertTokenizerFast.from_pretrained("./fine_tuned_bert_icelandic")
-model = BertForTokenClassification.from_pretrained("./fine_tuned_bert_icelandic")
+tokenizer = BertTokenizerFast.from_pretrained("./fine_tuned_bert_icelandic_testing")
+model = BertForTokenClassification.from_pretrained("./fine_tuned_bert_icelandic_testing")
 
 # Function to predict tags on a new sentence
 def predict_tags(sentence, tokenizer, model, id2tag):
@@ -24,8 +26,9 @@ def predict_tags(sentence, tokenizer, model, id2tag):
     label_ids = torch.argmax(output.logits, dim=2).squeeze().tolist()
 
     # Convert label IDs to tag names
-    tags = [id2tag[label_id] if label_id in id2tag else 'O' for label_id in label_ids]
-    
+    print(f'Og label_ids: {label_ids}')
+    tags = [id2tag[str(label_id)] if str(label_id) in id2tag else 'O' for label_id in label_ids]
+    print(f'generated tags: {tags}')
     # Filter out predictions for padding tokens
     word_ids = tokenized_input.word_ids()  # Match back to original words
     tags = [tag for tag, word_id in zip(tags, word_ids) if word_id is not None]
