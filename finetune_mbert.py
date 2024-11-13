@@ -105,11 +105,12 @@ training_args = TrainingArguments(
     learning_rate=3e-5,
     per_device_train_batch_size=8,
     gradient_accumulation_steps=2,
-    per_device_eval_batch_size=8,
-    eval_accumulation_steps=4, # internet says this could help with evaluation memory issues; processes evaluation batches in small chuncks instead of all at once
+    per_device_eval_batch_size=2,
+    eval_accumulation_steps=8, # internet says this could help with evaluation memory issues; processes evaluation batches in small chuncks instead of all at once
     num_train_epochs=3,
     weight_decay=0.01,
     fp16=True, # added fp16 as it can lead to better memory management at close to no cost of performance (supposedly)
+    gradient_checkpointing=True,
 )
 
 # Initialize Trainer
@@ -119,11 +120,14 @@ trainer = Trainer(
     train_dataset=dataset,  # Use a train/validation split in practice
     eval_dataset=dataset,   # Use separate validation dataset in practice
     tokenizer=tokenizer,
-    compute_metrics=compute_metrics
+    # compute_metrics=compute_metrics
 )
 
 # Fine-tune the model
 trainer.train()
+
+# Evaluate after training
+trainer.evaluate()
 
 # Save the fine-tuned model and tokenizer
 model.save_pretrained("./fine_tuned_bert_icelandic_testing")
