@@ -1,5 +1,6 @@
 # project specific ignores
 fine_tuned_bert_icelandic_ds10/
+fine_tuned_bert_icelandic_label_testing/
 results/
 
 # Byte-compiled / optimized / DLL files
