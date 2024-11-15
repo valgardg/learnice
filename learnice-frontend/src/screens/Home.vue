@@ -11,39 +11,49 @@
                 </div>
             </div>
             <!-- tagged words -->
-            <div v-if="tagged.length > 0" class="tagged-frame d-flex flex-wrap">
+            <div v-if="taggedSentence.length > 0" class="tagged-frame d-flex flex-wrap">
                 <div v-for="(word, index) in taggedSentence" :key="index" :style="{ marginRight: index !== taggedSentence.length - 1 && taggedSentence[index+1].word != '.' ? '5px' : '0px'}">
-                    <div :class="['tag-class', word.word != '.' ? 'white-text' : '', getTagClass(word.tag)]">
+                    <div :class="['tag-class', !isPunctuation(word.word[0]) ? 'white-text' : '', getTagClass(word.tag)]">
                         {{ word.word }}
                     </div>
                 </div>
             </div>
         </div>
+        <LoadingModal v-if="isLoading" />
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import LoadingModal from '@/components/loading/LoadingModal.vue';
 import { useTagStore } from '@/stores/TagStore';
 import { storeToRefs } from 'pinia';
+import { isPunctuation } from '@/utils/punctuation';
 
-const { taggedSentence } = storeToRefs(useTagStore());
+const { tagSentence } = useTagStore();
+const { taggedSentence, isLoading } = storeToRefs(useTagStore());
 const typed = ref('')
-const tagged = ref('');
 
 const tagInput = () => {
-    tagged.value = typed.value;
-    console.log('Tagged value is now: ' + tagged.value);
+    tagSentence(typed.value);
 }
 
 const getTagClass = (tag: string) => {
     switch (tag[0]) {
+        case 'c':
+            return 'conjunction';
         case 'n':
             return 'noun';
-        case 'a':
+        case 'l':
             return 'adjective';
-        case 'v':
+        case 's':
             return 'verb';
+        case 'a':
+            return 'adverb';
+        case 'f':
+            return 'pronoun';
+        case 'g':
+            return 'article';
         default:
             return '';
     }
@@ -73,14 +83,25 @@ const getTagClass = (tag: string) => {
 .white-text {
     color: white;
 }
-
+.conjunction {
+    background-color: #39d37c;
+}
 .noun {
     background-color: rgb(208, 177, 38);
 }
 .verb {
     background-color: rgb(255, 116, 116);
 }
+.adverb {
+    background-color: #0A2342;
+}
 .adjective {
     background-color: rgb(116, 137, 255);
+}
+.pronoun {
+    background-color: #f890de;
+}
+.article {
+    background-color: rgb(98, 229, 229)
 }
 </style>
