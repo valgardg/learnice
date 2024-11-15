@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import LoadingModal from '@/components/loading/LoadingModal.vue';
 import { useTagStore } from '@/stores/TagStore';
 import { storeToRefs } from 'pinia';
@@ -61,7 +61,6 @@ const getTagClass = (tag: string) => {
             return '';
     }
 }
-
 </script>
 
 <style scoped>
@@ -87,24 +86,24 @@ const getTagClass = (tag: string) => {
     color: white;
 }
 .conjunction {
-    background-color: #39d37c;
+    background-color: #20f17a;
 }
 .noun {
-    background-color: rgb(208, 177, 38);
+    background-color: rgb(255, 210, 7);
 }
 .verb {
-    background-color: rgb(255, 116, 116);
+    background-color: rgb(255, 76, 76);
 }
 .adverb {
     background-color: #0A2342;
 }
 .adjective {
-    background-color: rgb(116, 137, 255);
+    background-color: rgb(78, 105, 255);
 }
 .pronoun {
-    background-color: #f890de;
+    background-color: #ff48ce;
 }
 .article {
-    background-color: rgb(98, 229, 229)
+    background-color: rgb(93, 246, 246)
 }
 </style>

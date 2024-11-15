@@ -3,7 +3,7 @@
 		<div class="container-fluid d-flex justify-content-between">
 			<div class="col-2">
 				<!-- <img src="@/assets/images/learnice_logo.png" class="header-logo" /> -->
-				 <div class="header-text">Learnice</div>
+				 <div class="header-text fs-5">Learnice</div>
 			</div>
 		</div>
 	</nav>
@@ -13,7 +13,7 @@
 .header-div {
 	margin-top: 0px;
 	padding: 18px 10px;
-	background-color: #58A4B0;
+	background-color: #368BC1;
 	border: 0px;
 	border-bottom: 1px;
 	border-style: solid;

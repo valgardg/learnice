@@ -2,29 +2,27 @@
     <div class="tooltip-container" @mouseenter="show = true" @mouseleave="show = false">
         <slot></slot>
         <div v-if="show" class="tooltip">
-            <div class="fs-5">{{ posTag.word }}</div>
+            <div class="fs-5">{{ posTag.word }} - {{ posTag.translation }}</div>
+            <!-- Iterate through posTag keys -->
+            <div v-for="(value, key) in parseDynamicPosTag(posTag.tag)" :key="key">
+                {{ value }}
+            </div>
+            {{ parsedTag.length }}
         </div>
     </div>
 </template>
   
 <script setup lang="ts">
 import { PoSTag } from '@/types/PoSTag';
-import { ref, defineProps, computed } from 'vue';
+import { ref, defineProps, computed, onMounted } from 'vue';
+import { parseDynamicPosTag } from '@/utils/generateWordInfo'
 
 const props = defineProps<{
     posTag: PoSTag;
 }>();
 
 const show = ref(false);
-
-const wordInfo = computed(() => {
-    const info: {[key: string]: string}[] = [];
-    if(props.posTag.tag[0] == 'n') {
-        for(const char of props.posTag.tag) {
-            info.push({[char]: char});
-        }
-    }
-});
+const parsedTag = ref({});
 </script>
 
 <style scoped>
@@ -35,19 +33,19 @@ const wordInfo = computed(() => {
 
 .tooltip {
     position: absolute;
-    background-color: #f0f0f0;
+    background-color: #ffffff;
     color: #000000;
     padding: 8px;
     border: solid;
     border-width: 0.1rem;
-    border-radius: 0.4rem;
+    border-radius: 0.2rem;
     white-space: nowrap;
     z-index: 1000;
     opacity: 1.0;
     
     transform: translate(-50%, -50%);
-    top: 100%;
-    left: 25%;
+    top: 220%;
+    left: 75%;
     margin-top: 8px;
 }
 </style>

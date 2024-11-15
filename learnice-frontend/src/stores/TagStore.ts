@@ -32,7 +32,8 @@ export const useTagStore = defineStore('tagStore', {
                     console.log(item);
                     this.taggedSentence.push({
                         'word': item[0],
-                        'tag': item[1]
+                        'tag': item[1],
+                        'translation': item[2],
                     })
                 }
                 this.isLoading = false;
