@@ -1,0 +1,43 @@
+{
+  "hash": "0d204cf9",
+  "configHash": "6f7de353",
+  "lockfileHash": "c9f1d777",
+  "browserHash": "f9441ca4",
+  "optimized": {
+    "bootstrap/dist/js/bootstrap.js": {
+      "src": "../../node_modules/bootstrap/dist/js/bootstrap.js",
+      "file": "bootstrap_dist_js_bootstrap__js.js",
+      "fileHash": "aa978b71",
+      "needsInterop": true
+    },
+    "vue": {
+      "src": "../../node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "cdc08f27",
+      "needsInterop": false
+    },
+    "pinia": {
+      "src": "../../node_modules/pinia/dist/pinia.mjs",
+      "file": "pinia.js",
+      "fileHash": "06a51da0",
+      "needsInterop": false
+    },
+    "vue-router": {
+      "src": "../../node_modules/vue-router/dist/vue-router.esm-bundler.js",
+      "file": "vue-router.js",
+      "fileHash": "567c106f",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-AYVSL3LM": {
+      "file": "chunk-AYVSL3LM.js"
+    },
+    "chunk-XSWAMETM": {
+      "file": "chunk-XSWAMETM.js"
+    },
+    "chunk-NIBQISYW": {
+      "file": "chunk-NIBQISYW.js"
+    }
+  }
+}
