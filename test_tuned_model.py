@@ -1,6 +1,6 @@
 # Load the fine-tuned model
 from transformers import BertTokenizerFast, BertForTokenClassification
-import torch
+import torch # type: ignore
 import json
 
 # Load id2tag mapping
