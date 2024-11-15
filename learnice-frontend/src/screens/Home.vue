@@ -4,7 +4,7 @@
             <div class="d-flex flex-column">
                 <input 
                     class="input-frame" 
-                    placeholder="Enter an Icelanndic sentence to PoS tag!"
+                    placeholder="Enter an Icelandic sentence to PoS tag!"
                     v-model="typed"/>
                 <div class="d-flex justify-content-end mt-2">
                     <button class="btn btn-primary" @click="tagInput">PoS Tag</button>
@@ -13,9 +13,11 @@
             <!-- tagged words -->
             <div v-if="taggedSentence.length > 0" class="tagged-frame d-flex flex-wrap">
                 <div v-for="(word, index) in taggedSentence" :key="index" :style="{ marginRight: index !== taggedSentence.length - 1 && taggedSentence[index+1].word != '.' ? '5px' : '0px'}">
-                    <div :class="['tag-class', !isPunctuation(word.word[0]) ? 'white-text' : '', getTagClass(word.tag)]">
-                        {{ word.word }}
-                    </div>
+                    <WordTooltip :posTag="word">
+                        <div :class="['tag-class', !isPunctuation(word.word[0]) ? 'white-text' : '', getTagClass(word.tag)]">
+                            {{ word.word }}
+                        </div>
+                    </WordTooltip>
                 </div>
             </div>
         </div>
@@ -29,6 +31,7 @@ import LoadingModal from '@/components/loading/LoadingModal.vue';
 import { useTagStore } from '@/stores/TagStore';
 import { storeToRefs } from 'pinia';
 import { isPunctuation } from '@/utils/punctuation';
+import WordTooltip from '@/components/WordTooltip.vue';
 
 const { tagSentence } = useTagStore();
 const { taggedSentence, isLoading } = storeToRefs(useTagStore());
