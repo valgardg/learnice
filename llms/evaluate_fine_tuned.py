@@ -1,11 +1,11 @@
 import json
-import torch # type: ignore
-from torch.utils.data import Dataset # type: ignore
+import torch
+import math
+from torch.utils.data import Dataset
 from transformers import BertTokenizerFast, BertForTokenClassification, Trainer, TrainingArguments
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
-# load mBERT tokenizer
 tokenizer = BertTokenizerFast.from_pretrained('bert-base-multilingual-cased')
 transformed = []
 
@@ -47,10 +47,6 @@ def align_tags_with_tokens(sentence, tags, tokenizer):
     
     return tokenized_input, aligned_tags
 
-# testing
-# tokenized_input, aligned_tags = align_tags_with_tokens(['Fræðslu-', 'og', 'kynningarfundur', 'kl.', '14', '.'], ['kt', 'c', 'nken', 'ks', 'ta', 'pl'], tokenizer)
-# print(f'tokenized_input: {tokenized_input}\naligned_tags: {aligned_tags}')
-
 class PosDataset(Dataset):
     def __init__(self, data, tokenizer, max_length):
         self.data = data
@@ -72,62 +68,45 @@ class PosDataset(Dataset):
             'labels': torch.tensor(aligned_tags)
         }
     
-dataset = PosDataset(data=transformed, tokenizer=tokenizer, max_length=128)
+eval_dataset = PosDataset(data=transformed[:math.ceil(len(transformed)*0.5)], tokenizer=tokenizer, max_length=128)
+print(len(eval_dataset))
 
-# Load BERT model for token classification
-model = BertForTokenClassification.from_pretrained("bert-base-multilingual-cased", num_labels=len(tag2id))
-
-# Define the metrics for evaluation
 def compute_metrics(pred):
     labels = pred.label_ids
-    preds = np.argmax(pred.predictions, axis=2)
-
-    # Mask out padding tokens (-100) when computing metrics
-    mask = labels != -100
-    labels = labels[mask]
-    preds = preds[mask]
-
-    precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average="weighted")
+    preds = np.argmax(pred.predictions, axis=1)
+    precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average='weighted')
     accuracy = accuracy_score(labels, preds)
-
     return {
-        "accuracy": accuracy,
-        "f1": f1,
-        "precision": precision,
-        "recall": recall
+        'accuracy': accuracy,
+        'precision': precision,
+        'recall': recall,
+        'f1': f1
     }
 
-# Set up Trainer and TrainingArguments
-training_args = TrainingArguments(
+# Load your tokenizer and model from saved checkpoint
+tokenizer = BertTokenizerFast.from_pretrained("./fine_tuned_bert_icelandic_ds50")
+model = BertForTokenClassification.from_pretrained("./fine_tuned_bert_icelandic_ds50")
+
+eval_args = TrainingArguments(
     output_dir="./results",
-    evaluation_strategy="epoch",
-    learning_rate=3e-5,
-    per_device_train_batch_size=16,
-    gradient_accumulation_steps=2,
-    per_device_eval_batch_size=16,
-    eval_accumulation_steps=4, # internet says this could help with evaluation memory issues; processes evaluation batches in small chuncks instead of all at once
-    num_train_epochs=3,
-    weight_decay=0.01,
-    fp16=True, # added fp16 as it can lead to better memory management at close to no cost of performance (supposedly)
+    per_device_eval_batch_size=16,  # Adjust batch size as needed
+    logging_dir="./logs",
+    report_to="none"  # Disable logging for simplicity in evaluation
 )
 
-# Initialize Trainer
+# Initialize Trainer for evaluation
 trainer = Trainer(
     model=model,
-    args=training_args,
-    train_dataset=dataset,  # Use a train/validation split in practice
-    eval_dataset=dataset,   # Use separate validation dataset in practice
+    args=eval_args,
     tokenizer=tokenizer,
-    compute_metrics=compute_metrics
+    compute_metrics=compute_metrics,
+    eval_dataset=eval_dataset
 )
 
-# Fine-tune the model
-trainer.train()
+# Evaluate the model
+results = trainer.evaluate()
 
-# Save the fine-tuned model and tokenizer
-model.save_pretrained("./fine_tuned_bert_icelandic")
-tokenizer.save_pretrained("./fine_tuned_bert_icelandic")
-
-# Save id2tag mapping
-with open("id2tag.json", "w") as f:
-    json.dump(id2tag, f)
+# Display evaluation results
+print("Evaluation Results:")
+for key, value in results.items():
+    print(f"{key}: {value}")
