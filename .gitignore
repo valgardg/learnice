@@ -2,6 +2,7 @@
 fine_tuned_bert_icelandic_ds10/
 fine_tuned_bert_icelandic_label_testing/
 fine_tuned_bert_icelandic_ds50/
+models/
 results/
 
 # Byte-compiled / optimized / DLL files
