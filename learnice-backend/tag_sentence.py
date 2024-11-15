@@ -6,12 +6,12 @@ import json
 # Function to predict tags on a new sentence
 def predict_tags(sentence):
     sentence = sentence.split(" ")
-    with open("./fine_tuned_bert_icelandic_ds50/id2tag_ftbi_d50.json", "r") as f:
+    with open("../models/ftbi_ds100/id2tag_ftbi_ds100.json", "r") as f:
         id2tag = json.load(f)
 
     # Load your tokenizer and model from saved checkpoint
-    tokenizer = BertTokenizerFast.from_pretrained("./fine_tuned_bert_icelandic_ds50")
-    model = BertForTokenClassification.from_pretrained("./fine_tuned_bert_icelandic_ds50")
+    tokenizer = BertTokenizerFast.from_pretrained("../models/ftbi_ds100")
+    model = BertForTokenClassification.from_pretrained("../models/ftbi_ds100")
     # Tokenize the sentence
     tokenized_input = tokenizer(sentence, is_split_into_words=True, return_tensors="pt")
     
