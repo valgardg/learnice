@@ -24,6 +24,32 @@ def translate_icelandic_to_english(word):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
+    
+def translate_english_to_icelandic(sentence):
+    """
+    Translates an English sentence to Icelandic using AWS Translate.
+
+    Parameters:
+    sentence (str): The English sentence to translate.
+
+    Returns:
+    str: The translated Icelandic sentence.
+    """
+    # Create a Translate client
+    translate = boto3.client('translate', region_name='us-east-1')  # Adjust region if needed
+
+    try:
+        # Call AWS Translate
+        response = translate.translate_text(
+            Text=sentence,
+            SourceLanguageCode='en',  # English language code
+            TargetLanguageCode='is'  # Icelandic language code
+        )
+        return response['TranslatedText']
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
 
 # Example usage
 # icelandic_word = "hestur"  # Example Icelandic word

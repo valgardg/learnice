@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from tag_sentence import predict_tags
 
+from translate_word import translate_english_to_icelandic
+
 app = FastAPI()
 
 app.add_middleware(
@@ -16,4 +18,11 @@ app.add_middleware(
 @app.get("/tag/{sentence}")
 def pos_tag_sentence(sentence: str):
     tagged_sentence = predict_tags(sentence)
+    return tagged_sentence
+
+
+@app.get("/tag/english/{sentence}")
+def pos_tag_englsih(sentence: str):
+    translated_icelandic_sentence = translate_english_to_icelandic(sentence)
+    tagged_sentence = predict_tags(translated_icelandic_sentence)
     return tagged_sentence
