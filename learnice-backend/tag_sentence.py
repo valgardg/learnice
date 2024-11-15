@@ -2,10 +2,23 @@
 from transformers import BertTokenizerFast, BertForTokenClassification
 import torch
 import json
+import string
+
+from translate_word import translate_icelandic_to_english
+
+def remove_punctuation(word):
+    return ''.join(char for char in word if char not in string.punctuation)
 
 # Function to predict tags on a new sentence
 def predict_tags(sentence):
     sentence = sentence.split(" ")
+
+    # translate each word in the sentence
+    english_words = []
+    for word in sentence:
+        english_word = translate_icelandic_to_english(remove_punctuation(word))
+        english_words.append(english_word)
+
     with open("../models/ftbi_ds100/id2tag_ftbi_ds100.json", "r") as f:
         id2tag = json.load(f)
 
@@ -48,4 +61,6 @@ def predict_tags(sentence):
         word_tags.append(current_tags[0])  # Use the first tag, or customize this
     
     # Return the original words and their aggregated tags
-    return list(zip(sentence, word_tags))
+    return list(zip(sentence, word_tags, english_words))
+
+# print(predict_tags('Það er ekki gaman að vera einmana.'))
