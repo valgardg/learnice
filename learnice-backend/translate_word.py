@@ -1,4 +1,22 @@
+import os
+from dotenv import load_dotenv
 import boto3
+
+# Load environment variables from the .env file
+load_dotenv()
+
+# Get credentials from environment variables
+aws_access_key = os.getenv('AWS_ACCESS_KEY_ID')
+aws_secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+aws_region = os.getenv('AWS_DEFAULT_REGION')
+
+# Initialize AWS Translate client using environment variables
+translate = boto3.client(
+    'translate',
+    aws_access_key_id=aws_access_key,
+    aws_secret_access_key=aws_secret_key,
+    region_name=aws_region
+)
 
 def translate_icelandic_to_english(word):
     """

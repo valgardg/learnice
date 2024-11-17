@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from tag_sentence import predict_tags
-
 from translate_word import translate_english_to_icelandic
+from classify_sentence import classify_sentence_language
 
 app = FastAPI()
 
@@ -17,7 +17,12 @@ app.add_middleware(
 
 @app.get("/tag/{sentence}")
 def pos_tag_sentence(sentence: str):
-    tagged_sentence = predict_tags(sentence)
+    sentence_lang = classify_sentence_language(sentence)
+    if sentence_lang == "English-Latin1":
+        translated_icelandic_sentence = translate_english_to_icelandic(sentence)
+        tagged_sentence = predict_tags(translated_icelandic_sentence)
+    else:
+        tagged_sentence = predict_tags(sentence)
     return tagged_sentence
 
 
