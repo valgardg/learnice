@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Dict, List
 
+from check_grammar import check_sentence_grammar
 from tag_sentence import predict_tags
+from translate_word import translate_english_to_icelandic
+from classify_sentence import classify_sentence_language
 
 app = FastAPI()
 
@@ -15,5 +19,33 @@ app.add_middleware(
 
 @app.get("/tag/{sentence}")
 def pos_tag_sentence(sentence: str):
-    tagged_sentence = predict_tags(sentence)
-    return tagged_sentence
+    """
+    Perform POS tagging and grammar checking for a given sentence.
+    If the sentence is in English, translate it to Icelandic before processing.
+    """
+    try:
+        # Step 1: Detect the sentence language
+        sentence_lang = classify_sentence_language(sentence)
+
+        # Step 2: Translate if needed and process the sentence
+        if sentence_lang == "English-Latin1":
+            translated_icelandic_sentence = translate_english_to_icelandic(sentence)
+            tagged_sentence = predict_tags(translated_icelandic_sentence)
+            grammar_suggestions = [] # assume that translation doesn't contain spelling or grammar mistakes
+        else:
+            tagged_sentence = predict_tags(sentence)
+            grammar_suggestions = check_sentence_grammar(sentence)
+
+        print(tagged_sentence)
+        print(grammar_suggestions)
+        print(sentence_lang)
+
+        # Step 3: Prepare the response
+        return {
+            "tagged-sentence": tagged_sentence,  # Tagged sentence structure
+            "suggestions": grammar_suggestions,  # Grammar suggestions
+            "predicted-language": sentence_lang  # Detected language
+        }
+    except Exception as e:
+        # Handle unexpected errors gracefully
+        return {"error": str(e)}

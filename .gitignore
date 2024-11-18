@@ -2,6 +2,7 @@
 fine_tuned_bert_icelandic_ds10/
 fine_tuned_bert_icelandic_label_testing/
 fine_tuned_bert_icelandic_ds50/
+ftbi_ds100/
 models/
 results/
 
