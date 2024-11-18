@@ -1,112 +1,147 @@
+# Load the fine-tuned model
+from transformers import BertTokenizerFast, BertForTokenClassification
+import torch # type: ignore
 import json
-import torch
-import math
-from torch.utils.data import Dataset
-from transformers import BertTokenizerFast, BertForTokenClassification, Trainer, TrainingArguments
-import numpy as np
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+from collections import defaultdict
 
-tokenizer = BertTokenizerFast.from_pretrained('bert-base-multilingual-cased')
-transformed = []
+def read_lines_from_file(filename):
+    with open(filename, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+    return [line.strip() for line in lines]
 
-# turn each line into a sentence tag object
-with open('./data/MIM-GOLD.sent', "r") as f:
-    for line in f.readlines():
-        sentence = []
-        tags = []
-        tagged_words = line.strip().split(' ')
-        for tagged_word in tagged_words:
-            tag_and_word = tagged_word.split('/')
-            sentence.append(tag_and_word[0])
-            tags.append(tag_and_word[1])
-        transformed.append({
-            "sentence": sentence,
-            "tags": tags
-        })
-
-unique_tags = list(set(tag for sentence in transformed for tag in sentence["tags"]))
-tag2id = {tag: idx for idx, tag in enumerate(unique_tags)}
-id2tag = {idx: tag for tag, idx in tag2id.items()}
-
-
-def align_tags_with_tokens(sentence, tags, tokenizer):
-    tokenized_input = tokenizer(sentence, is_split_into_words=True, truncation=True, padding='max_length')
-    aligned_tags = []
-
-    word_ids = tokenized_input.word_ids()
-    previous_word_idx = None
-
-    for word_idx in word_ids:
-        if word_idx is None:
-            aligned_tags.append(-100) # Ignore padding tokens
-        elif word_idx != previous_word_idx:
-            aligned_tags.append(tag2id[tags[word_idx]])
-        else:
-            aligned_tags.append(-100)
-        previous_word_idx = word_idx
-    
-    return tokenized_input, aligned_tags
-
-class PosDataset(Dataset):
-    def __init__(self, data, tokenizer, max_length):
-        self.data = data
-        self.tokenizer = tokenizer
-        self.max_length = max_length
-
-    def __len__(self):
-        return len(self.data)
-    
-    def __getitem__(self, idx):
-        sentence = self.data[idx]["sentence"]
-        tags = self.data[idx]["tags"]
-
-        tokenized_input, aligned_tags = align_tags_with_tokens(sentence, tags, self.tokenizer)
-
-        return {
-            'input_ids': torch.tensor(tokenized_input['input_ids']),
-            'attention_mask': torch.tensor(tokenized_input['attention_mask']),
-            'labels': torch.tensor(aligned_tags)
-        }
-    
-eval_dataset = PosDataset(data=transformed[:math.ceil(len(transformed)*0.5)], tokenizer=tokenizer, max_length=128)
-print(len(eval_dataset))
-
-def compute_metrics(pred):
-    labels = pred.label_ids
-    preds = np.argmax(pred.predictions, axis=1)
-    precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average='weighted')
-    accuracy = accuracy_score(labels, preds)
-    return {
-        'accuracy': accuracy,
-        'precision': precision,
-        'recall': recall,
-        'f1': f1
-    }
+# Load id2tag mapping
+with open("../models/ftbi_ds100/id2tag_ftbi_ds100.json", "r") as f:
+    id2tag = json.load(f)
 
 # Load your tokenizer and model from saved checkpoint
-tokenizer = BertTokenizerFast.from_pretrained("./fine_tuned_bert_icelandic_ds50")
-model = BertForTokenClassification.from_pretrained("./fine_tuned_bert_icelandic_ds50")
+tokenizer = BertTokenizerFast.from_pretrained("../models/ftbi_ds100")
+model = BertForTokenClassification.from_pretrained("../models/ftbi_ds100")
 
-eval_args = TrainingArguments(
-    output_dir="./results",
-    per_device_eval_batch_size=16,  # Adjust batch size as needed
-    logging_dir="./logs",
-    report_to="none"  # Disable logging for simplicity in evaluation
-)
+# Function to predict tags on a new sentence
+def predict_tags(sentence, tokenizer, model, id2tag):
+    # Tokenize the sentence
+    tokenized_input = tokenizer(sentence, is_split_into_words=True, return_tensors="pt")
+    
+    # Get predictions
+    with torch.no_grad():
+        output = model(**tokenized_input)
+    
+    # Get predicted label IDs
+    label_ids = torch.argmax(output.logits, dim=2).squeeze().tolist()
+    
+    # Convert label IDs to tag names
+    tags = [id2tag[str(label_id)] if str(label_id) in id2tag else 'O' for label_id in label_ids]
+    
+    # Match back to original words
+    word_ids = tokenized_input.word_ids()  # This shows which original word each token corresponds to
+    word_tags = []
+    current_word_id = None
+    current_tags = []
 
-# Initialize Trainer for evaluation
-trainer = Trainer(
-    model=model,
-    args=eval_args,
-    tokenizer=tokenizer,
-    compute_metrics=compute_metrics,
-    eval_dataset=eval_dataset
-)
+    # Aggregate tags for each word
+    for word_id, tag in zip(word_ids, tags):
+        if word_id is None:  # Skip special tokens
+            continue
+        if word_id != current_word_id:  # New word detected
+            if current_tags:  # Append the aggregated tag for the previous word
+                word_tags.append(current_tags[0])  # Use the first tag, or customize this
+            current_word_id = word_id
+            current_tags = [tag]
+        else:
+            current_tags.append(tag)  # Aggregate tags for the same word
 
-# Evaluate the model
-results = trainer.evaluate()
+    # Append the last word's tag
+    if current_tags:
+        word_tags.append(current_tags[0])  # Use the first tag, or customize this
+    
+    return word_tags
 
-# Display evaluation results
-print("Evaluation Results:")
-for key, value in results.items():
-    print(f"{key}: {value}")
+def separate_sentence_and_tags(line):
+    """
+    Separates a line of text into a sentence without tags and a list of tags.
+
+    Args:
+        line (str): Input line where each token is formatted as 'word/tag'.
+
+    Returns:
+        tuple: A tuple containing:
+            - sentence (str): The sentence without tags.
+            - tags (list): A list of tags extracted from the line.
+    """
+    words = []
+    tags = []
+    # Split the line into tokens by whitespace
+    tokens = line.split()
+    for token in tokens:
+        if '/' in token:
+            word, tag = token.rsplit('/', 1)  # Use rsplit to handle words with slashes
+            words.append(word)
+            tags.append(tag)
+        else:
+            words.append(token)  # Add token as-is if it doesn't contain a tag
+    
+    # Join the words into a sentence
+    sentence = ' '.join(words)
+    return sentence, tags
+
+def calculate_metrics(lines, tokenizer, model, id2tag):
+    correct = 0
+    total = 0
+    true_positive = defaultdict(int)
+    false_positive = defaultdict(int)
+    false_negative = defaultdict(int)
+
+    # Read and process each line
+    for line in lines:
+
+        # Separate sentence and true tags
+        sentence, true_tags = separate_sentence_and_tags(line)
+
+        # Get predicted tags
+        predicted_tags = predict_tags(sentence.split(), tokenizer, model, id2tag)
+
+        # Compare true and predicted tags
+        for true_tag, predicted_tag in zip(true_tags, predicted_tags):
+            total += 1
+            if true_tag == predicted_tag:
+                correct += 1
+                true_positive[true_tag] += 1
+            else:
+                false_positive[predicted_tag] += 1
+                false_negative[true_tag] += 1
+
+    # Calculate metrics
+    accuracy = correct / total if total > 0 else 0
+
+    precision = {tag: true_positive[tag] / (true_positive[tag] + false_positive[tag])
+                 if (true_positive[tag] + false_positive[tag]) > 0 else 0
+                 for tag in true_positive}
+    recall = {tag: true_positive[tag] / (true_positive[tag] + false_negative[tag])
+              if (true_positive[tag] + false_negative[tag]) > 0 else 0
+              for tag in true_positive}
+
+    macro_precision = sum(precision.values()) / len(precision) if precision else 0
+    macro_recall = sum(recall.values()) / len(recall) if recall else 0
+
+    return {
+        "accuracy": accuracy,
+        "precision": precision,
+        "recall": recall,
+        "macro_precision": macro_precision,
+        "macro_recall": macro_recall
+    }
+
+# Example usage with a new Icelandic sentence
+# sentence = ["Hraunbær", "105", "."]
+# sentence = ["Niðurstaða", "þess", "var", "neikvæð", "."]
+# sentence = "Kl. 9-16 fótaaðgerðir og hárgreiðsla , Kl. 9.15 handavinna , Kl. 13.30 sungið við flygilinn , Kl. 14.30-16 dansað við lagaval Halldóru , kaffiveitingar allir velkomnir .".split()
+lines = read_lines_from_file('../data/test_mim_transform.sent')
+# predicted_tags = predict_tags(lines[0].split(), tokenizer, model, id2tag)
+
+metrics = calculate_metrics(lines, tokenizer, model, id2tag)
+
+print("Accuracy:", metrics["accuracy"])
+print("Macro Precision:", metrics["macro_precision"])
+print("Macro Recall:", metrics["macro_recall"])
+print("Per-tag Precision:", metrics["precision"])
+print("Per-tag Recall:", metrics["recall"])

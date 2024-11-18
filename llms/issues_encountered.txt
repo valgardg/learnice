@@ -2,3 +2,6 @@ torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 6.36 GiB. GPU 0 ha
 (venv) valgardgudni@fraunhofer-System-Product-Name:~/Desktop/learnice$ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 ^ to tackle above issue, first tried reducing batch sizes from 16 to 8 and adding clear cache to end of every epoch
+
+
+Eventually, compute_metrics had to be disabled in training arguments as this consistenly lead to CUDA memory issues

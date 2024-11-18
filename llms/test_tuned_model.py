@@ -4,12 +4,12 @@ import torch # type: ignore
 import json
 
 # Load id2tag mapping
-with open("id2tag_testing.json", "r") as f:
+with open("../models/ftbi_ds100/id2tag_ftbi_ds100.json", "r") as f:
     id2tag = json.load(f)
 
 # Load your tokenizer and model from saved checkpoint
-tokenizer = BertTokenizerFast.from_pretrained("./fine_tuned_bert_icelandic_ds50")
-model = BertForTokenClassification.from_pretrained("./fine_tuned_bert_icelandic_ds50")
+tokenizer = BertTokenizerFast.from_pretrained("../models/ftbi_ds100")
+model = BertForTokenClassification.from_pretrained("../models/ftbi_ds100")
 
 # Function to predict tags on a new sentence
 def predict_tags(sentence, tokenizer, model, id2tag):
