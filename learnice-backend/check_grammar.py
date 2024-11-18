@@ -1,15 +1,18 @@
-from reynir_correct import check_errors
+from reynir_correct import check_single
 
-# Icelandic sentence to check
-sentence = "Ég er að skrifa eitthvað rangt málfræði."
+# find any sugguestions or corrections for the given sentence
+# sentence is expected to be Icelandic
+def check_sentence_grammar(sentence):
+    sent = check_single(sentence)
+    grammar_suggestions = []
+    for annotation in sent.annotations:
+        incorrect  = annotation.original
+        corrected = annotation.suggest
+        if incorrect != None and corrected != None:
+            suggestion = {
+                'incorrect': incorrect,
+                'corrected': corrected
+            }
+            grammar_suggestions.append(suggestion)
 
-# Perform grammar checking
-corrections = check_errors(sentence)
-
-# Display results
-if corrections:
-    print("Errors detected:")
-    for error in corrections:
-        print(f"- {error['text']}")
-else:
-    print("No errors found.")
+    return grammar_suggestions
