@@ -10,6 +10,10 @@
                     <button class="btn btn-primary" @click="tagInput">PoS Tag</button>
                 </div>
             </div>
+            <!-- predicted language -->
+            <div class="d-flex justify-content-end pred-langauge-text" v-if="predictedLangauge">
+                <div>Predicted input language: {{ predictedLangauge }}</div>
+            </div>
             <!-- tagged words -->
             <div v-if="taggedSentence.length > 0" class="tagged-frame d-flex flex-wrap">
                 <div v-for="(word, index) in taggedSentence" :key="index" :style="{ marginRight: index !== taggedSentence.length - 1 && taggedSentence[index+1].word != '.' ? '5px' : '0px'}">
@@ -18,6 +22,17 @@
                             {{ word.word }}
                         </div>
                     </WordTooltip>
+                </div>
+            </div>
+            <!-- grammar suggestins -->
+            <div v-if="grammarSuggestions.length > 0" class="mt-2 suggestion-frame">
+                <div class="fs-4 suggestion-title fw-bold">Grammar and spelling suggestions</div>
+                <div v-for="(suggestion, index) in grammarSuggestions" :key="index">
+                    <div class="d-flex flex-row align-items-center mt-1">
+                        <div class="incorrect">{{ suggestion.incorrect }}</div>
+                        <div>-></div>
+                        <div class="correct">{{ suggestion.corrected }}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -34,7 +49,7 @@ import { isPunctuation } from '@/utils/punctuation';
 import WordTooltip from '@/components/WordTooltip.vue';
 
 const { tagSentence } = useTagStore();
-const { taggedSentence, isLoading } = storeToRefs(useTagStore());
+const { taggedSentence, grammarSuggestions, predictedLangauge, isLoading } = storeToRefs(useTagStore());
 const typed = ref('')
 
 const tagInput = () => {
@@ -77,6 +92,9 @@ const getTagClass = (tag: string) => {
     width: 60rem;
     font-size: x-large;
 }
+.suggestion-frame {
+    padding: 1rem;
+}
 .tag-class {
     padding: 6px;
     border-radius: 0.6rem;
@@ -105,5 +123,23 @@ const getTagClass = (tag: string) => {
 }
 .article {
     background-color: rgb(93, 246, 246)
+}
+.pred-langauge-text {
+    font-size: small;
+    margin-top: 0.5rem;
+}
+.incorrect {
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+    background-color: rgb(255, 76, 76);
+    border-radius: 0.8rem;
+    color: white;
+}
+.correct {
+    padding: 0.5rem;
+    margin-left: 0.5rem;
+    background-color: #20f17a;
+    border-radius: 0.8rem;
+    color: white;
 }
 </style>
