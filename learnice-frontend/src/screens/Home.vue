@@ -1,13 +1,16 @@
 <template>
-    <div class="d-flex justify-content-center align-items-center">
-        <div class="d-flex flex-column">    
-            <div class="d-flex flex-column">
-                <input 
+    <div class="d-flex justify-content-center align-items-start">
+        <div class="d-flex flex-column">  
+              <!-- input section -->
+            <div class="d-flex flex-column input-section">
+                <p class="fs-2">The Learnice Sentence Analyzer</p>
+                <p>Simply input an Icelandic or English sentence; English sentences will be automatically translated to Icelandic. Each word is then analyzed with PoS tagging, showing details like word class, gender, number, case, and declension. You'll also see a direct translation of each word. If there are any grammar or spelling mistakes, we’ll provide suggestions to help you improve. Perfect for learning and mastering Icelandic!</p>
+                <input
                     class="input-frame" 
-                    placeholder="Enter an Icelandic sentence to PoS tag!"
+                    placeholder="Enter an Icelandic or English sentence to analyze!"
                     v-model="typed"/>
                 <div class="d-flex justify-content-end mt-2">
-                    <button class="btn btn-primary" @click="tagInput">PoS Tag</button>
+                    <button class="btn btn-primary" @click="tagInput">Analyze sentence</button>
                 </div>
             </div>
             <!-- predicted language -->
@@ -79,6 +82,10 @@ const getTagClass = (tag: string) => {
 </script>
 
 <style scoped>
+.input-section {
+    width: 60rem;
+    margin-top: 7rem;
+}
 .input-frame {
     border: solid;
     border-radius: 0.8rem;
@@ -86,6 +93,7 @@ const getTagClass = (tag: string) => {
     padding: 1rem;
     width: 60rem;
     font-size: x-large;
+    margin-top: 1rem;
 }
 .tagged-frame {
     padding: 1rem;
