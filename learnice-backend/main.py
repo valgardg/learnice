@@ -31,7 +31,7 @@ def pos_tag_sentence(sentence: str):
         if sentence_lang == "English-Latin1":
             translated_icelandic_sentence = translate_english_to_icelandic(sentence)
             tagged_sentence = predict_tags(translated_icelandic_sentence)
-            grammar_suggestions = check_sentence_grammar(translated_icelandic_sentence)
+            grammar_suggestions = [] # assume that translation doesn't contain spelling or grammar mistakes
         else:
             tagged_sentence = predict_tags(sentence)
             grammar_suggestions = check_sentence_grammar(sentence)
