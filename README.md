@@ -1,5 +1,8 @@
 # Learnice
 
+## Intelligent Icelandic Language Processing System 🌐🇮🇸
+An NLP-powered application designed to assist with Icelandic language learning and processing. This project integrates key functionalities such as Part-of-Speech (PoS) tagging, spelling and grammar suggestions, and bilingual translation, enabling users to seamlessly analyze, correct, and translate Icelandic and English text.
+
 ## Overview
 This project is a web application consisting of:
 
