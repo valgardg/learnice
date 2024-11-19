@@ -33,12 +33,15 @@ def pos_tag_sentence(sentence: str):
             tagged_sentence = predict_tags(translated_icelandic_sentence)
             grammar_suggestions = [] # assume that translation doesn't contain spelling or grammar mistakes
         else:
+            print('sentence lang is Icelandic')
             tagged_sentence = predict_tags(sentence)
+            print('tagged sentence:', tagged_sentence)
             grammar_suggestions = check_sentence_grammar(sentence)
+            print(f'Grammer suggestions: {grammar_suggestions}')
 
-        print(tagged_sentence)
-        print(grammar_suggestions)
-        print(sentence_lang)
+        print(f'tagged_sentence: {tagged_sentence}')
+        print(f'grammar_suggestions: {grammar_suggestions}')
+        print(f'sentence_lang: {sentence_lang}')
 
         # Step 3: Prepare the response
         return {

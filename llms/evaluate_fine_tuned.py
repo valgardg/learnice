@@ -2,6 +2,7 @@
 from transformers import BertTokenizerFast, BertForTokenClassification
 import torch # type: ignore
 import json
+import math
 from collections import defaultdict
 
 def read_lines_from_file(filename):
@@ -92,8 +93,9 @@ def calculate_metrics(lines, tokenizer, model, id2tag):
     false_negative = defaultdict(int)
 
     # Read and process each line
-    for line in lines:
-
+    for i in range(len(lines)):
+        line = lines[i]
+        print(f'line {i} of {len(lines)}')
         # Separate sentence and true tags
         sentence, true_tags = separate_sentence_and_tags(line)
 
@@ -135,13 +137,13 @@ def calculate_metrics(lines, tokenizer, model, id2tag):
 # sentence = ["Hraunbær", "105", "."]
 # sentence = ["Niðurstaða", "þess", "var", "neikvæð", "."]
 # sentence = "Kl. 9-16 fótaaðgerðir og hárgreiðsla , Kl. 9.15 handavinna , Kl. 13.30 sungið við flygilinn , Kl. 14.30-16 dansað við lagaval Halldóru , kaffiveitingar allir velkomnir .".split()
-lines = read_lines_from_file('../data/test_mim_transform.sent')
+lines = read_lines_from_file('../data/MIM-GOLD.sent')
 # predicted_tags = predict_tags(lines[0].split(), tokenizer, model, id2tag)
 
-metrics = calculate_metrics(lines, tokenizer, model, id2tag)
+metrics = calculate_metrics(lines[:math.ceil(0.1 * len(lines))], tokenizer, model, id2tag)
 
 print("Accuracy:", metrics["accuracy"])
 print("Macro Precision:", metrics["macro_precision"])
 print("Macro Recall:", metrics["macro_recall"])
-print("Per-tag Precision:", metrics["precision"])
-print("Per-tag Recall:", metrics["recall"])
+# print("Per-tag Precision:", metrics["precision"])
+# print("Per-tag Recall:", metrics["recall"])

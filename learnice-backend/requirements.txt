@@ -47,7 +47,7 @@ PyYAML==6.0.2
 regex==2024.11.6
 requests==2.32.3
 reynir==3.5.6
-reynir-correct @ file:///<path_to_project>/learnice/learnice-backend/GreynirCorrect-3.4.7
+reynir-correct @ file:///home/valgard/Desktop/learnice/learnice-backend/GreynirCorrect-3.4.7
 rich==13.9.4
 s3transfer==0.10.3
 safetensors==0.4.5
