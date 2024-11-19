@@ -20,7 +20,6 @@ httpx==0.27.2
 huggingface-hub==0.26.2
 icegrams==1.1.2
 idna==3.10
-islenska==1.0.0
 itsdangerous==2.2.0
 Jinja2==3.1.4
 jmespath==1.0.1
@@ -47,7 +46,9 @@ PyYAML==6.0.2
 regex==2024.11.6
 requests==2.32.3
 reynir==3.5.6
-reynir-correct @ file:///home/valgard/Desktop/learnice/learnice-backend/GreynirCorrect-3.4.7
+islenska==1.0.0
+reynir-correct==3.4.7
+islenska==1.0.0
 rich==13.9.4
 s3transfer==0.10.3
 safetensors==0.4.5
