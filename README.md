@@ -19,9 +19,8 @@ Dependencies: Installed via npm for the frontend and pip for the backend
 - source venv/bin/active 
 2. install project dependancies
 - cd learnice-backend
+- **IMPORTANT**: replace '<path_to_project>' in line 50 of requirements.txt with the path to your project
 - pip3 install -r requirements.txt
-IMPORTANT
-- replace '<path_to_project>' in line 50 of requirements.txt with the path to your project
 3. start the backend project
 - uvicorn main:app --reload
 
