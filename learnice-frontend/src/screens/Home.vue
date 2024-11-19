@@ -75,6 +75,8 @@ const getTagClass = (tag: string) => {
             return 'pronoun';
         case 'g':
             return 'article';
+        case 't':
+            return 'numeral';
         default:
             return '';
     }
@@ -131,6 +133,9 @@ const getTagClass = (tag: string) => {
 }
 .article {
     background-color: rgb(93, 246, 246)
+}
+.numeral {
+    background-color: #80fd27;
 }
 .pred-langauge-text {
     font-size: small;
