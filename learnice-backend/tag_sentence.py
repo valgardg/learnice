@@ -4,7 +4,7 @@ import torch
 import json
 import string
 
-from translate_word import translate_icelandic_to_english
+from translate_word import translate_icelandic_word_to_english
 
 def remove_punctuation(word):
     return ''.join(char for char in word if char not in string.punctuation)
@@ -16,7 +16,7 @@ def predict_tags(sentence):
     # translate each word in the sentence
     english_words = []
     for word in sentence:
-        english_word = translate_icelandic_to_english(remove_punctuation(word))
+        english_word = translate_icelandic_word_to_english(remove_punctuation(word))
         english_words.append(english_word)
 
     with open("../models/ftbi_ds100/id2tag_ftbi_ds100.json", "r") as f:
